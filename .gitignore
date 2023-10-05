@@ -49,3 +49,7 @@ local.properties
 # Gradle
 .gradle/
 build/
+
+
+
+/Logs/
