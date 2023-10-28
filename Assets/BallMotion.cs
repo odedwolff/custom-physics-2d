@@ -153,31 +153,61 @@ public class BallMotion : MonoBehaviour
       // Access the other collider's transform
         Transform otherTransform = other.transform;
 
-        // Calculate the angle with the horizon
-        //float otherAngleWithHorizon = Vector3.Angle(otherTransform.up, Vector3.up) * -1;
-        float otherAngleWithHorizon = other.transform.rotation.eulerAngles.x % 360;
+       
+        //float othersRawAngleWHor = other.transform.rotation.eulerAngles.x;
 
-        Debug.Log("[POV Ball] Other's Angle with horizon: " + otherAngleWithHorizon);  
+        float othersRawAngleWHor = other.GetComponent<Transform>().eulerAngles.x;
+        //float othersRawAngleWHor = AltXRead(other);
+        //Debug.Log("[POV Ball] Other's raw full transition " + other.transform.rotation.eulerAngles);
+        //Debug.Log("[POV Ball] Other's raw full transition " + other.transform.rotation);
         
-        Debug.Log("[POV Ball] my veloctity(z,y) = ("+ velocity.z  +"," + velocity.y  + ")");
+        //float xAngle = Vector3.Angle(eulerToCartesian(other.transform.rotation.eulerAngles), Vector3.forward);
+        //Debug.Log("[POV Ball] calculated X angle = " + xAngle);
+
+
+        Vector3 convVector = eulerToCartesian(other.transform.rotation.eulerAngles);
+        Debug.Log("[POV Ball] converted vector = " + convVector);
+        double conVecCalcAngle = Math.Atan2(convVector[1], convVector[2]) / Math.PI * 180 * -1;
+        Debug.Log("[POV Ball] calculated x rotation from converted vector = " + conVecCalcAngle);
+
+
+
+       // Debug.Log("[POV Ball] Other's raw Angle with horizon: " + othersRawAngleWHor); 
+
+
+
+        //float otherAngleWithHorizon = (other.transform.rotation.eulerAngles.x +360) % 360;
+
+        float otherAngleWithHorizon = (float)conVecCalcAngle;
+
+
+
+
+
+        //Debug.Log("[POV Ball] Other's Angle with horizon: " + otherAngleWithHorizon);  
+        
+        //Debug.Log("[POV Ball] my veloctity(z,y) = ("+ velocity.z  +"," + velocity.y  + ")");
 
         double orgMag = Math.Sqrt (velocity[1] * velocity[1] + velocity[2] * velocity[2]);
 
 
         double selfAngleHor = Math.Atan2(velocity[1],velocity[2]) * (180.0 / Math.PI);
-        //double selfAngleHor = Math.Atan2(velocity[2],velocity[1]) * (180.0 / Math.PI);
-        //selfAngleHor = 180 - selfAngleHor - 360;
+        
+
         selfAngleHor = selfAngleHor * -1;
-        Debug.Log("[POV Ball] Self Angle with horizon: " + selfAngleHor);
+
+        selfAngleHor = (selfAngleHor + 360) % 360;
+
+       // Debug.Log("[POV Ball] Self Angle with horizon: " + selfAngleHor);
 
         double relAngWIncPlane = ((selfAngleHor - otherAngleWithHorizon)  + 360 ) % 360 ;
-        Debug.Log("[POV Ball] relAngWIncPlane: " + relAngWIncPlane);
+       // Debug.Log("[POV Ball] relAngWIncPlane: " + relAngWIncPlane);
 
         double refSelfAngleWIncPlane = 180 - relAngWIncPlane;
-        Debug.Log("[POV Ball] refSelfAngleWIncPlane: " + refSelfAngleWIncPlane);
+       // Debug.Log("[POV Ball] refSelfAngleWIncPlane: " + refSelfAngleWIncPlane);
 
         double refAngleWHor = ((refSelfAngleWIncPlane + otherAngleWithHorizon) + 360 ) %360;
-        Debug.Log("[POV Ball] refAngleWHor: " + refAngleWHor);
+        //Debug.Log("[POV Ball] refAngleWHor: " + refAngleWHor);
 
         /* float outZ = (float)(orgMag * Math.Cos(refAngleWHor));  
         float outY = (float)(orgMag * Math.Sin(refAngleWHor));  
@@ -193,6 +223,44 @@ public class BallMotion : MonoBehaviour
         velocity = rflVel;
         
     }
+
+
+    private static Vector3 eulerToCartesian(Vector3 euler)
+    {
+        // Convert Euler angles to a Quaternion
+        Quaternion rotationQuaternion = Quaternion.Euler(euler);
+
+        // Convert the Quaternion to a Vector3 (representing a forward direction)
+        Vector3 rotationVector = rotationQuaternion * Vector3.forward;
+
+        Debug.Log("Euler Angles: " + euler);
+        Debug.Log("Rotation Vector: " + rotationVector);
+        return rotationVector;
+    }
+
+
+
+    private float AltXRead(Collider other)
+    {
+        Transform otherTransform = other.GetComponent<Transform>();
+
+        // Get the local-to-world transformation matrix of the other object
+        Matrix4x4 matrix = otherTransform.localToWorldMatrix;
+
+        // Extract the rotation quaternion from the matrix
+        Quaternion rotationQuaternion = matrix.rotation;
+
+        // Convert the quaternion to Euler angles and access the X rotation
+        Vector3 eulerAngles = rotationQuaternion.eulerAngles;
+
+        // Use eulerAngles.x as the X rotation in world space
+        Debug.Log("X Rotation of the other object (world space): " + eulerAngles.x);
+
+        return eulerAngles.x;
+
+    }
+
+
 
     private void PauseGame()
     {

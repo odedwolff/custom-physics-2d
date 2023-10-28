@@ -126,6 +126,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   acceleration: 0
-  initial_Y_velocity: -3
-  initial_Z_velocity: 1.5
+  initial_Y_velocity: -5
+  initial_Z_velocity: -5
   MIN_Y: -10
